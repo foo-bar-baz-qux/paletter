@@ -20,4 +20,3 @@ palette_maker("data/nascita_venere.jpg",number_of_colors = 20)
 \author{
 Andrea Cirillo
 }
-

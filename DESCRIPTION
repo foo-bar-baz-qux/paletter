@@ -1,9 +1,10 @@
 Package: paletter
-Title: make a palette from your image
-Version: 0.0.0.9000
-Authors@R: person("Andrea", "Cirillo", email = "andreacirilloac@gmail.com", role = c("aut", "cre"))
-Description: processes a custom jpeg image producing a palett with a user-defined number of colours
-Depends: R
+Title: Make a color palette from your image
+Version: 0.1.0
+Authors@R: c(
+  person("Andrea", "Cirillo", email = "andreacirilloac@gmail.com", role = c("aut", "cre")),
+  person("Victor", "Lei", email = "viclei@gmail.com", role = c("aut")))
+Description: Processes a custom jpeg image producing a palett with a user-defined number of colours
 Imports:
   colorspace,
   jpeg,

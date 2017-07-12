@@ -30,18 +30,20 @@ palette_maker <- function(image_path = NA, number_of_colors = 20){
 
 #' Make a palette from your image in a particular color space
 #'
-#' Processes a custom jpeg image producing a palett with a
-#'   user-defined number of colours. This will allow any color space available
-#'   in the `colorspace` package. There may be conversion issues if the selected
-#'   color space does not have a valid representation of the all RGB values in
-#'   the picture.
+#' Processes a custom jpeg image producing a palett with a user-defined number
+#' of colours. This will allow any color space available in the `colorspace`
+#' package. There may be conversion issues if the selected color space does not
+#' have a valid representation of the all RGB values in the picture.
 #'
 #' @param image_path Relative path to the custom image, including .jpeg
 #'   extension
 #' @param number_of_colors Number of different colors desired for the resulting
 #'   palette
-#' @param use_LAB Whether to use the CIELAB space instead of the default RGB
-#' @param colspace A valid color class from the `colorspace` package.
+#' @param colspace A valid color class from the `colorspace` package. Valid
+#'   choices are 'RGB', 'LAB', 'LUV', 'XYZ', 'HLS', 'HSV', 'polarLUV',
+#'   'polarLAB', 'sRGB'.
+#' @param plot_colors Whether to display a rough plot of the selected colors
+#'   using the `scales` package.
 #' @inheritParams stats::kmeans
 #' @author Victor Lei (based on Andrea Cirillo's original code)
 #' @examples
