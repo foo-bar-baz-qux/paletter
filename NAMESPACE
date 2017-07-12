@@ -2,6 +2,7 @@
 
 export(palette_maker)
 export(palette_maker_cs)
+export(run_test_paletter)
 import(colorspace)
 importFrom(jpeg,readJPEG)
 importFrom(scales,show_col)

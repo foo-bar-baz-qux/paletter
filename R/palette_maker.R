@@ -21,7 +21,7 @@ palette_maker <- function(image_path = NA, number_of_colors = 20){
     B = as.vector(painting[,,3])
   )
   k_means        <- kmeans(painting_rgb[,c("R","G","B")], centers = number_of_colors, iter.max = 30)
-  colours_k      <- rgb(k_means$centers[k_means$cluster,])
+  colours_k      <- grDevices::rgb(k_means$centers[k_means$cluster,])
   colours_vector <- unique(colours_k)
   show_col(colours_vector)
   return(colours_vector)
@@ -63,7 +63,7 @@ palette_maker_cs <- function(image_path = NA, number_of_colors = 20, colspace = 
                              G = as.vector(painting[,, 2]),
                              B = as.vector(painting[,, 3])))
 
-  painting_rgb <- as(colorspace::RGB(painting_raw_rgb_data), colspace)
+  painting_rgb <- methods::as(colorspace::RGB(painting_raw_rgb_data), colspace)
 
   k_means <- stats::kmeans(colorspace::coords(painting_rgb), centers = number_of_colors,
                            iter.max = iter.max, nstart = nstart)
@@ -75,4 +75,41 @@ palette_maker_cs <- function(image_path = NA, number_of_colors = 20, colspace = 
   if(plot_colors) scales::show_col(colors_vector)
 
   return(colors_vector)
+}
+
+
+#' Use a number of different methods to generate color palettes
+#'
+#' Clustering in different color spaces yield somewhat different color palettes.
+#' This helper function automates the process of clustering your image in
+#' different color spaces.
+#'
+#' @param img_path The path to your JPEG image file
+#' @param out_prefix The filename output prefix to which the color space name is
+#'   appended (e.g. 'myimage' results in 'myimage_RGB.png', 'myimage_LAB.png'
+#'   etc.)
+#' @param test_col_spaces Which color spaces to test. All valid color spaces in the `colorspace` package are supported. See \code{\link{palette_maker_cs}}.
+#' @param num_colors Number of colors to produce in your palette
+#' @param out_w Output image width in pixels
+#' @param out_h Output image height in pixels
+#' @param nstart Number of global re-runs of kmeans
+#' @param iter.max Number of local iterations of kmeans
+#' @examples
+#'  run_test_paletter('data/nascita_venere.jpg', 'nascita_venere', num_colors = 9, nstart = 5)
+#' @export
+run_test_paletter <- function(img_path, out_prefix, test_col_spaces = c('RGB', 'LAB', 'HLS'), num_colors = 9, out_w = 500, out_h = 500, nstart = 1, iter.max = 100) {
+  # Use the original paletter function
+  message('Trying original RGB color space')
+  grDevices::png(file = paste0(out_prefix, '_original.png'), width = out_w, height = out_h)
+  ret = palette_maker(img_path, number_of_colors = num_colors)
+  grDevices::dev.off()
+
+  # Use the new paletter function with a variety of different color spaces
+  for( cur_cs in test_col_spaces ) {
+    message('Trying color space ', cur_cs)
+    grDevices::png(file = paste0(out_prefix, '_', cur_cs, '.png'), width = out_w, height = out_h)
+    ret = palette_maker_cs(img_path, number_of_colors = num_colors, colspace = "LAB", nstart = nstart, iter.max = iter.max)
+    dev.off()
+  }
+  message('All tests completed!')
 }
