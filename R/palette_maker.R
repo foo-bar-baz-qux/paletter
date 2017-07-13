@@ -7,7 +7,8 @@
 #' @param number_of_colors number of different colors desired for the resulting palette
 #' @author Andrea Cirillo
 #' @examples
-#' palette_maker("data/nascita_venere.jpg",number_of_colors = 20)
+#'   palette_maker(
+#'     system.file('extdata', "nascita_venere.jpg", package="paletter"), number_of_colors = 20)
 #' @export
 palette_maker <- function(image_path = NA, number_of_colors = 20){
   if (is.na(image_path)){stop("you must provide a jpg image to build your palette from")}
@@ -44,14 +45,22 @@ palette_maker <- function(image_path = NA, number_of_colors = 20){
 #'   'polarLAB', 'sRGB'.
 #' @param plot_colors Whether to display a rough plot of the selected colors
 #'   using the `scales` package.
+#' @param seed Set a seed for reproducibility.
+#' @param use_hex Whether to use the `colorspace::hex()` function or
+#'   `grDevices::rgb()` for converting to a hex color string when returning the
+#'   result. `hex()` seems to return lighter, pastel-like colors.
+#' @param nstart Number of global re-runs of kmeans
+#' @param iter.max Number of local iterations of kmeans
 #' @inheritParams stats::kmeans
 #' @author Victor Lei (based on Andrea Cirillo's original code)
 #' @examples
-#' palette_maker_cs('data/nascita_venere.jpg', number_of_colors = 20, colspace = "LAB", iter.max = 100)
+#'   palette_maker_cs(
+#'     system.file('extdata', "nascita_venere.jpg", package="paletter"),
+#'     number_of_colors = 20, colspace = "LAB", iter.max = 100)
 #' @import colorspace
 #' @export
-palette_maker_cs <- function(image_path = NA, number_of_colors = 20, colspace = "RGB",
-                          iter.max = 50, nstart = 1, plot_colors = TRUE) {
+palette_maker_cs <- function(image_path = NA, number_of_colors = 9, colspace = "RGB",
+                          iter.max = 50, nstart = 5, plot_colors = TRUE, seed = NULL, use_hex = FALSE) {
   if( !(colspace %in% c('RGB', 'LAB', 'LUV', 'XYZ', 'HLS', 'HSV', 'polarLUV', 'polarLAB', 'sRGB') ) ) {
     stop("Color space ", colspace, " not supported")
   }
@@ -63,14 +72,19 @@ palette_maker_cs <- function(image_path = NA, number_of_colors = 20, colspace = 
                              G = as.vector(painting[,, 2]),
                              B = as.vector(painting[,, 3])))
 
-  painting_rgb <- methods::as(colorspace::RGB(painting_raw_rgb_data), colspace)
+  painting_cs <- coords(methods::as(colorspace::RGB(painting_raw_rgb_data), colspace))
 
-  k_means <- stats::kmeans(colorspace::coords(painting_rgb), centers = number_of_colors,
+  set.seed(seed)
+  k_means <- stats::kmeans(painting_cs, centers = number_of_colors,
                            iter.max = iter.max, nstart = nstart)
 
-  colours_k <- colorspace::hex(do.call(colspace, list(k_means$centers)))
+  if(use_hex) {
+    colors_k <- colorspace::hex(do.call(colspace, list(k_means$centers)))
+  } else {
+    colors_k <- grDevices::rgb( coords(methods::as(do.call(colspace, list(k_means$centers)), 'RGB') ))
+  }
 
-  colors_vector <- sort(colours_k, decreasing = TRUE)
+  colors_vector <- sort(colors_k, decreasing = TRUE)
 
   if(plot_colors) scales::show_col(colors_vector)
 
@@ -84,6 +98,7 @@ palette_maker_cs <- function(image_path = NA, number_of_colors = 20, colspace = 
 #' This helper function automates the process of clustering your image in
 #' different color spaces.
 #'
+#' @author Victor Lei
 #' @param img_path The path to your JPEG image file
 #' @param out_prefix The filename output prefix to which the color space name is
 #'   appended (e.g. 'myimage' results in 'myimage_RGB.png', 'myimage_LAB.png'
@@ -92,12 +107,13 @@ palette_maker_cs <- function(image_path = NA, number_of_colors = 20, colspace = 
 #' @param num_colors Number of colors to produce in your palette
 #' @param out_w Output image width in pixels
 #' @param out_h Output image height in pixels
-#' @param nstart Number of global re-runs of kmeans
-#' @param iter.max Number of local iterations of kmeans
+#' @inheritDotParams palette_maker_cs
 #' @examples
-#'  run_test_paletter('data/nascita_venere.jpg', 'nascita_venere', num_colors = 9, nstart = 5)
+#'  run_test_paletter(
+#'    system.file('extdata', "nascita_venere.jpg", package="paletter"),
+#'    'nascita_venere', num_colors = 9, nstart = 5)
 #' @export
-run_test_paletter <- function(img_path, out_prefix, test_col_spaces = c('RGB', 'LAB', 'HLS'), num_colors = 9, out_w = 500, out_h = 500, nstart = 1, iter.max = 100) {
+run_test_paletter <- function(img_path, out_prefix, test_col_spaces = c('RGB', 'LAB', 'HLS'), num_colors = 9, out_w = 500, out_h = 500, ...) {
   # Use the original paletter function
   message('Trying original RGB color space')
   grDevices::png(file = paste0(out_prefix, '_original.png'), width = out_w, height = out_h)
@@ -108,8 +124,8 @@ run_test_paletter <- function(img_path, out_prefix, test_col_spaces = c('RGB', '
   for( cur_cs in test_col_spaces ) {
     message('Trying color space ', cur_cs)
     grDevices::png(file = paste0(out_prefix, '_', cur_cs, '.png'), width = out_w, height = out_h)
-    ret = palette_maker_cs(img_path, number_of_colors = num_colors, colspace = "LAB", nstart = nstart, iter.max = iter.max)
-    dev.off()
+    ret = palette_maker_cs(img_path, number_of_colors = num_colors, colspace = "LAB", ...)
+    grDevices::dev.off()
   }
   message('All tests completed!')
 }

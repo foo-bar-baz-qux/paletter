@@ -15,7 +15,8 @@ palette_maker(image_path = NA, number_of_colors = 20)
 processes a custom jpeg image producing a palett with a user-defined number of colours
 }
 \examples{
-palette_maker("data/nascita_venere.jpg",number_of_colors = 20)
+  palette_maker(
+    system.file('extdata', "nascita_venere.jpg", package="paletter"), number_of_colors = 20)
 }
 \author{
 Andrea Cirillo

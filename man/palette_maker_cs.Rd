@@ -4,8 +4,9 @@
 \alias{palette_maker_cs}
 \title{Make a palette from your image in a particular color space}
 \usage{
-palette_maker_cs(image_path = NA, number_of_colors = 20, colspace = "RGB",
-  iter.max = 50, nstart = 1, plot_colors = TRUE)
+palette_maker_cs(image_path = NA, number_of_colors = 9, colspace = "RGB",
+  iter.max = 50, nstart = 5, plot_colors = TRUE, seed = NULL,
+  use_hex = FALSE)
 }
 \arguments{
 \item{image_path}{Relative path to the custom image, including .jpeg
@@ -18,13 +19,18 @@ palette}
 choices are 'RGB', 'LAB', 'LUV', 'XYZ', 'HLS', 'HSV', 'polarLUV',
 'polarLAB', 'sRGB'.}
 
-\item{iter.max}{the maximum number of iterations allowed.}
+\item{iter.max}{Number of local iterations of kmeans}
 
-\item{nstart}{if \code{centers} is a number, how many random sets
-    should be chosen?}
+\item{nstart}{Number of global re-runs of kmeans}
 
 \item{plot_colors}{Whether to display a rough plot of the selected colors
 using the `scales` package.}
+
+\item{seed}{Set a seed for reproducibility.}
+
+\item{use_hex}{Whether to use the `colorspace::hex()` function or
+`grDevices::rgb()` for converting to a hex color string when returning the
+result. `hex()` seems to return lighter, pastel-like colors.}
 }
 \description{
 Processes a custom jpeg image producing a palett with a user-defined number
@@ -33,7 +39,9 @@ package. There may be conversion issues if the selected color space does not
 have a valid representation of the all RGB values in the picture.
 }
 \examples{
-palette_maker_cs('data/nascita_venere.jpg', number_of_colors = 20, colspace = "LAB", iter.max = 100)
+  palette_maker_cs(
+    system.file('extdata', "nascita_venere.jpg", package="paletter"),
+    number_of_colors = 20, colspace = "LAB", iter.max = 100)
 }
 \author{
 Victor Lei (based on Andrea Cirillo's original code)

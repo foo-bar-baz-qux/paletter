@@ -5,8 +5,7 @@
 \title{Use a number of different methods to generate color palettes}
 \usage{
 run_test_paletter(img_path, out_prefix, test_col_spaces = c("RGB", "LAB",
-  "HLS"), num_colors = 9, out_w = 500, out_h = 500, nstart = 1,
-  iter.max = 100)
+  "HLS"), num_colors = 9, out_w = 500, out_h = 500, ...)
 }
 \arguments{
 \item{img_path}{The path to your JPEG image file}
@@ -23,9 +22,24 @@ etc.)}
 
 \item{out_h}{Output image height in pixels}
 
-\item{nstart}{Number of global re-runs of kmeans}
-
-\item{iter.max}{Number of local iterations of kmeans}
+\item{...}{Arguments passed on to \code{palette_maker_cs}
+\describe{
+  \item{image_path}{Relative path to the custom image, including .jpeg
+extension}
+  \item{number_of_colors}{Number of different colors desired for the resulting
+palette}
+  \item{colspace}{A valid color class from the `colorspace` package. Valid
+choices are 'RGB', 'LAB', 'LUV', 'XYZ', 'HLS', 'HSV', 'polarLUV',
+'polarLAB', 'sRGB'.}
+  \item{plot_colors}{Whether to display a rough plot of the selected colors
+using the `scales` package.}
+  \item{seed}{Set a seed for reproducibility.}
+  \item{use_hex}{Whether to use the `colorspace::hex()` function or
+`grDevices::rgb()` for converting to a hex color string when returning the
+result. `hex()` seems to return lighter, pastel-like colors.}
+  \item{nstart}{Number of global re-runs of kmeans}
+  \item{iter.max}{Number of local iterations of kmeans}
+}}
 }
 \description{
 Clustering in different color spaces yield somewhat different color palettes.
@@ -33,5 +47,10 @@ This helper function automates the process of clustering your image in
 different color spaces.
 }
 \examples{
- run_test_paletter('data/nascita_venere.jpg', 'nascita_venere', num_colors = 9, nstart = 5)
+ run_test_paletter(
+   system.file('extdata', "nascita_venere.jpg", package="paletter"),
+   'nascita_venere', num_colors = 9, nstart = 5)
+}
+\author{
+Victor Lei
 }
